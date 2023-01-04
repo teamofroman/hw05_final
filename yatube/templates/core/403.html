@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Что-то пошло не так{% endblock %}
+{% block content %}
+  <div class="container">
+    <div class="row">
+      <aside class="col-12 col-md-3">
+        <span class="text-danger" style="font-size: 50pt">403</span>
+      </aside>
+      <article class="col-12 col-md-9">
+        <h1>Упс, похоже вам сюда нельзя.</h1>
+        <p>Можно вернуться на
+          <a href="{% url 'posts:index' %}">главную</a>
+          страницу или <a href="{% url 'users:login' %}">представиться</a>
+        </p>
+      </article>
+    </div>
+  </div>
+{% endblock %} 

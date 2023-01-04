@@ -1,0 +1,107 @@
+{% load static %}
+{% load user_filters %}
+<header>
+  <nav class="navbar navbar-expand-md navbar-dark bg-primary fixed-top"
+    style="background-color: lightskyblue">
+    <div class="container-fluid">
+      <img src="{% static 'img/logo.png' %}" width="30" height="30"
+        class="d-inline-block align-top" alt="">
+      <!-- Кнопка для сворачивания меню на маленьких экранах-->
+      <button class="navbar-toggler"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#navbarCollapse"
+        aria-controls="navbarCollapse"
+        aria-expanded="false"
+        aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <!-- Основное меню -->
+      {% with request.resolver_match.view_name as view_name %}
+        <div class="collapse navbar-collapse" id="navbarCollapse">
+          <ul class="navbar-nav me-auto mb-2 mb-md-0">
+            <li class="nav-item">
+              <a
+                class="nav-link {% if view_name  == 'posts:index' %}active{% endif %}"
+                aria-current="page"
+                href="{% url 'posts:index' %}">
+                <span style="color:red">Ya</span>tube
+              </a>
+            </li>
+          </ul>
+          <ul class="navbar-nav me-auto mb-2 mb-md-0">
+            <li class="nav-item">
+              <a
+                class="nav-link {% if view_name  == 'posts:index' %}active{% endif %}"
+                href="{% url 'posts:index' %}">
+                Главная
+              </a>
+            </li>
+            {% if user.is_authenticated %}
+              <li class="nav-item">
+                <a
+                  class="nav-link {% if view_name  == 'posts:post_create' %}active{% endif %}"
+                  href="{% url 'posts:post_create' %}">
+                  Новая запись
+                </a>
+              </li>
+            {% endif %}
+            <li class="nav-item">
+              <a
+                class="nav-link {% if view_name  == 'about:tech' %}active{% endif %}"
+                href="{% url 'about:tech' %}">
+                Технологии
+              </a>
+            </li>
+            <li class="nav-item">
+              <a
+                class="nav-link {% if view_name  == 'about:author' %}active{% endif %}"
+                href="{% url 'about:author' %}">
+                Об авторе
+              </a>
+            </li>
+          </ul>
+          <div class="d-flex">
+            {% if user.is_authenticated %}
+              <ul class="navbar-nav me-auto mb-2 mb-md-0">
+                <li class="nav-item">
+                  <a class="nav-link {% if view_name  == 'posts:profile' %}active{% endif %}"
+                    href="{% url 'posts:profile' user.get_username %}">
+                    {{ user|correct_username }}
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a
+                    class="nav-link {% if view_name  == 'users:password_change' %}active{% endif %}"
+                    href="{% url 'users:password_change' %}">
+                    Сменить пароль
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link"
+                    href="{% url 'users:logout' %}">
+                    Выход
+                  </a>
+                </li>
+              </ul>
+            {% else %}
+              <ul class="navbar-nav me-auto mb-2 mb-md-0">
+                <li class="nav-item">
+                  <a class="nav-link active" href="{% url 'users:signup' %}">
+                    Регистрация
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link active"
+                    href="{% url 'users:login' %}">
+                    Вход
+                  </a>
+                </li>
+              </ul>
+            {% endif %}
+          </div>
+        </div>
+      {% endwith %}
+    </div>
+  </nav>
+</header>

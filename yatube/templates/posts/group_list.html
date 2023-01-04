@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block title %}
+  Все сообщения группы {{ group.title }}}
+{% endblock %}
+{% block content %}
+  {% load user_filters %}
+  {% if group %}
+    <div class="container py-2">
+      <h1>{{ group.title }}</h1>
+      <p>{{ group.description }}</p>
+      <div class="container py-2">
+        {% include 'includes/paginator.html' %}
+      </div>
+      {% for post in page_obj %}
+        {% include 'includes/posts/post.html' %}
+        {% if not forloop.last %}
+          <hr>
+        {% endif %}
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <div class="container py-2">
+    {% include 'includes/paginator.html' %}
+  </div>
+{% endblock %}
