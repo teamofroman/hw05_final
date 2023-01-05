@@ -4,11 +4,14 @@ from django.contrib.auth.decorators import login_required
 from django.core.handlers.wsgi import WSGIRequest
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.views.decorators.cache import cache_page
+
 from posts.forms import CommentForm, PostForm
 from posts.models import Group, Post, User
 from posts.utils import build_page_from_posts
 
 
+@cache_page(20)
 def index(request: WSGIRequest) -> HttpResponse:
     """Обрабатываем обращения к главной странице сайта."""
     posts = Post.objects.select_related('author')

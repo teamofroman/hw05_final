@@ -2,23 +2,25 @@
 {% block title %}
   Все обновления на сайте
 {% endblock %}
-{% block content %}
-  {% load user_filters %}
-  <h1 class="py-2" style="text-align: center">Все обновления на сайте</h1>
-  <div class="container py-1">
+{% load cache %}
+{% cache 20 index_page %}
+  {% block content %}
+    {% load user_filters %}
+    <h1 class="py-2" style="text-align: center">Все обновления на сайте</h1>
+    <div class="container py-1">
+      <div class="container py-2">
+        {% include 'includes/paginator.html' %}
+      </div>
+      {% for post in page_obj %}
+        {% include 'includes/posts/post.html' %}
+        {% if not forloop.last %}
+          <hr>
+        {% endif %}
+      {% endfor %}
+    </div>
+
     <div class="container py-2">
       {% include 'includes/paginator.html' %}
     </div>
-    {% for post in page_obj %}
-      {% include 'includes/posts/post.html' %}
-      {% if not forloop.last %}
-        <hr>
-      {% endif %}
-    {% endfor %}
-  </div>
-
-  <div class="container py-2">
-    {% include 'includes/paginator.html' %}
-  </div>
-
-{% endblock %}
+  {% endblock %}
+{% endcache %}
