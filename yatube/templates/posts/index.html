@@ -7,12 +7,14 @@
   {% block content %}
     {% load user_filters %}
     <h1 class="py-2" style="text-align: center">Все обновления на сайте</h1>
+    <div class="container py-2">
+      {% include 'includes/paginator.html' %}
+    </div>
+
     <div class="container py-1">
-      <div class="container py-2">
-        {% include 'includes/paginator.html' %}
-      </div>
+
       {% for post in page_obj %}
-        {% include 'includes/posts/post.html' %}
+        {% include 'includes/posts/post_v2.html' %}
         {% if not forloop.last %}
           <hr>
         {% endif %}

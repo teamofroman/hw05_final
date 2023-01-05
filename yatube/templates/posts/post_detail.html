@@ -34,20 +34,24 @@
       </ul>
     </aside>
     <article class="col-12 col-md-9">
-      <p>
-        {% thumbnail post.image "960x339" crop="center" upscale=True as im %}
-          <img class="card-img my-2" src="{{ im.url }}" alt="Image">
-        {% endthumbnail %}
-        {{ post.text|linebreaksbr }}
-        {% if post.author == user %}
-          <div>
-            <a class="btn btn-primary"
-               href="{% url 'posts:post_edit' post.id %}">
-              Редактировать запись
-            </a>
-          </div>
-        {% endif %}
-      </p>
+      {% thumbnail post.image "960x339" crop="center" upscale=True as im %}
+        <img class="card-img my-2" src="{{ im.url }}" alt="Image">
+      {% endthumbnail %}
+      {{ post.text|linebreaksbr }}
+      {% if post.author == user %}
+        <div class="py-2">
+          <a class="btn btn-primary"
+             href="{% url 'posts:post_edit' post.id %}">
+            Редактировать запись
+          </a>
+        </div>
+      {% endif %}
+    </article>
+  </div>
+  <comment>
+    <hr>
+    <div class="container">
+      <h3>Комментарии</h3>
       {% if user.is_authenticated %}
         <div class="card my-4">
           <h5 class="card-header">Добавить комментарий:</h5>
@@ -61,6 +65,10 @@
             </form>
           </div>
         </div>
+      {% else %}
+        <p class="text-secondary bg-info">
+          Оставлять комментарии могут только зарегистрированные пользователи
+        </p>
       {% endif %}
 
       {% for comment in comments %}
@@ -77,6 +85,6 @@
           </div>
         </div>
       {% endfor %}
-    </article>
-  </div>
+    </div>
+  </comment>
 {% endblock %}
