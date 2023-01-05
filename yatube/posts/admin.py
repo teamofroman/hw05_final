@@ -1,6 +1,7 @@
 """Модуль для регистрации моделей в панели администрирования."""
 
 from django.contrib import admin
+
 from posts import models
 
 
@@ -16,3 +17,4 @@ class PostAdmin(admin.ModelAdmin):
 
 
 admin.site.register(models.Group)
+admin.site.register(models.Follow)
