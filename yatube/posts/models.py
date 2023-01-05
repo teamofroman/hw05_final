@@ -103,14 +103,14 @@ class Comment(models.Model):
         related_name='comments',
         on_delete=models.CASCADE,
         verbose_name='Комментируемый пост',
-        help_text='Выберите комментируемый пост.'
+        help_text='Выберите комментируемый пост.',
     )
     author = models.ForeignKey(
         User,
         related_name='comments',
         on_delete=models.CASCADE,
         verbose_name='Автор комментария',
-        help_text='Выберите автора комментария.'
+        help_text='Выберите автора комментария.',
     )
 
     class Meta:
@@ -126,3 +126,27 @@ class Comment(models.Model):
             if len(self.text) > MAX_PRESENTATION_LENGTH
             else self.text
         )
+
+
+class Follow(models.Model):
+    user = models.ForeignKey(
+        User,
+        related_name='follower',
+        on_delete=models.CASCADE,
+        verbose_name='Пользователь',
+        help_text='Выберите пользователя',
+    )
+    author = models.ForeignKey(
+        User,
+        related_name='following',
+        on_delete=models.CASCADE,
+        verbose_name='Автор поста',
+        help_text='Выберите автора поста',
+    )
+
+    class Meta:
+        verbose_name = 'Подписчики'
+        verbose_name_plural = 'Подписчики'
+
+    def __str__(self):
+        return f'{self.user.username} -> {self.author.username}'
