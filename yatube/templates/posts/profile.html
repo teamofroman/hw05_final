@@ -5,20 +5,41 @@
 {% endblock %}
 {% block content %}
   <div class="container py-5">
-    <h1>Все посты пользователя {{ author|correct_username }} </h1>
+    <h1>Все посты пользователя {{ author|correct_username }}</h1>
     <h3>Всего постов: {{ author.posts.count }} </h3>
+    {% if user.is_authenticated and user != author %}
+      <div class="container py-2">
+        {% if is_following %}
+          <a
+              class="btn btn-lg btn-light"
+              href="{% url 'posts:profile_unfollow' author.username %}"
+              role="button">
+            Отписаться от автора
+          </a>
+        {% else %}
+          <a
+              class="btn btn-lg btn-light"
+              href="{% url 'posts:profile_follow' author.username %}"
+              role="button">
+            Подписаться на автора
+          </a>
+        {% endif %}
+      </div>
+    {% endif %}
     <div class="container py-2">
       {% include 'includes/paginator.html' %}
     </div>
+
     {% for post in page_obj %}
       {% include 'includes/posts/post_v2.html' %}
       {% if not forloop.last %}
         <hr>
       {% endif %}
     {% endfor %}
-  </div>
 
-  <div class="container py-2">
-    {% include 'includes/paginator.html' %}
+    <div class="container py-2">
+      {% include 'includes/paginator.html' %}
+    </div>
+
   </div>
 {% endblock %}

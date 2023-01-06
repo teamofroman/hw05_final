@@ -1,18 +1,21 @@
 {% extends 'base.html' %}
 {% block title %}
-  Все обновления на сайте
+  Сообщения авторов, на которых Вы подписаны
 {% endblock %}
 {% load cache %}
 {% cache 20 index_page %}
   {% block content %}
     {% load user_filters %}
-    <h1 class="py-2" style="text-align: center">Все обновления на сайте</h1>
+    <h1 class="py-2" style="text-align: center">
+      Сообщения авторов, на которых Вы подписаны
+    </h1>
     {% include 'includes/posts/switcher.html' %}
     <div class="container py-2">
       {% include 'includes/paginator.html' %}
     </div>
 
     <div class="container py-1">
+
       {% for post in page_obj %}
         {% include 'includes/posts/post_v2.html' %}
         {% if not forloop.last %}
