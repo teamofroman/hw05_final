@@ -1,5 +1,6 @@
 """Тесты для проверки тестирования процедур формирования
 и отображения данных."""
+from django.core.cache import cache
 from django.core.paginator import Page
 from django.test import Client
 from django.urls import reverse
@@ -38,6 +39,7 @@ class TestPostsViewsPaginator(YatubeTestBase):
         self.auth_client_author = Client()
         self.auth_client_author.force_login(
             TestPostsViewsPaginator.test_author)
+        cache.clear()
 
     def __check_paginator_context(self, context, post_count, address):
         page_obj = self.get_field_from_context(context, Page)

@@ -1,5 +1,6 @@
 """Тесты для проверки тестирования процедур формирования
 и отображения данных."""
+from django.core.cache import cache
 from django.core.paginator import Page
 from django.db.models import Count
 from django.test import Client
@@ -34,6 +35,7 @@ class TestPostsViews(YatubeTestBase):
     def setUp(self):
         self.auth_client_author = Client()
         self.auth_client_author.force_login(TestPostsViews.test_author)
+        cache.clear()
 
     def __check_post_content(self, context, valid_post, page_address):
         page_obj = self.get_field_from_context(context, Page)

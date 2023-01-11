@@ -1,6 +1,7 @@
 """Тесты для проверки тестирования путей."""
 from http import HTTPStatus
 
+from django.core.cache import cache
 from django.test import Client
 from django.urls import reverse
 
@@ -34,6 +35,7 @@ class TestPostsUrls(YatubeTestBase):
         self.auth_client_author.force_login(TestPostsUrls.test_author)
         self.auth_client_user = Client()
         self.auth_client_user.force_login(TestPostsUrls.test_user)
+        cache.clear()
 
     def test_posts_urls_unauth_user(self):
         """Тестируем пути для неавторизированного пользователя."""
