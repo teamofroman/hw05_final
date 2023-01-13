@@ -15,6 +15,7 @@ class TestCache(YatubeTestBase):
         cache.clear()
 
     def test_cache(self):
+        """Тестирование страницы из кэша."""
         address = reverse('posts:index')
 
         resp_orign = self.get_response_get(
@@ -22,7 +23,7 @@ class TestCache(YatubeTestBase):
             address=address,
         )
 
-        new_post = Post.objects.create(
+        Post.objects.create(
             text='Auto created post',
             author=TestCache.test_user
         )
@@ -35,7 +36,7 @@ class TestCache(YatubeTestBase):
         self.assertEqual(
             resp_orign.content,
             resp_after_createpost_from_cache.content,
-            f'Stage1. Страницы разные',
+            'Stage1. Страницы разные',
         )
 
         cache.clear()
@@ -48,7 +49,5 @@ class TestCache(YatubeTestBase):
         self.assertNotEqual(
             resp_orign.content,
             resp_after_createpost_cache_clear.content,
-            f'Stage2. Страницы одинаковые',
+            'Stage2. Страницы одинаковые',
         )
-        
-
