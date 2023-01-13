@@ -16,5 +16,14 @@ class PostAdmin(admin.ModelAdmin):
     empty_value_display = '-пусто-'
 
 
+@admin.register(models.Comment)
+class CommentAdmin(admin.ModelAdmin):
+    list_display = ('pk', 'text', 'post', 'created', 'author')
+    search_fields = ('text', 'author',)
+    list_filter = ('created', 'author',)
+    list_editable = ('author', 'post',)
+    empty_value_display = '-пусто-'
+
+
 admin.site.register(models.Group)
 admin.site.register(models.Follow)
