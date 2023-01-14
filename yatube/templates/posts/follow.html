@@ -9,7 +9,7 @@
     <h1 class="py-2" style="text-align: center">
       Сообщения авторов, на которых Вы подписаны
     </h1>
-    {% include 'includes/posts/switcher.html' %}
+    {% include 'includes/posts/switcher.html' with show_page='follow' %}
     <div class="container py-2">
       {% include 'includes/paginator.html' %}
     </div>

@@ -1,4 +1,5 @@
 from django.core.paginator import Paginator
+
 from posts.constants import MAX_POSTS_ON_PAGE
 
 

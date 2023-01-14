@@ -33,7 +33,7 @@ class TestPostsViewsPaginator(YatubeTestBase):
             group=cls.test_group,
         ) for i in range(MAX_POSTS_ON_PAGE + POSTS_ON_LAST_PAGE)]
 
-        cls.test_posts = Post.objects.bulk_create(objs)
+        Post.objects.bulk_create(objs)
 
     def setUp(self):
         self.auth_client_author = Client()
@@ -55,29 +55,10 @@ class TestPostsViewsPaginator(YatubeTestBase):
             f'{len(page_obj)} != {post_count}',
         )
 
-    def test_posts_views_index_paginator(self):
-        """Проверяем паджинатор головной страницы."""
+    def test_posts_views_paginator(self):
         test_address = {
             reverse('posts:index'): MAX_POSTS_ON_PAGE,
             reverse('posts:index') + '?page=2': POSTS_ON_LAST_PAGE,
-        }
-
-        for address, obj_count in test_address.items():
-            with self.subTest(address=address):
-                response = self.get_response_get(
-                    self.auth_client_author,
-                    address,
-                )
-
-                self.__check_paginator_context(
-                    response.context,
-                    obj_count,
-                    address,
-                )
-
-    def test_posts_views_group_paginator(self):
-        """Проверяем паджинатор страницы группы."""
-        test_address = {
             reverse(
                 'posts:group_list',
                 kwargs={'slug': TestPostsViewsPaginator.test_group.slug},
@@ -87,24 +68,6 @@ class TestPostsViewsPaginator(YatubeTestBase):
                 kwargs={'slug': TestPostsViewsPaginator.test_group.slug},
             )
             + '?page=2': POSTS_ON_LAST_PAGE,
-        }
-
-        for address, obj_count in test_address.items():
-            with self.subTest(address=address):
-                response = self.get_response_get(
-                    self.auth_client_author,
-                    address,
-                )
-
-                self.__check_paginator_context(
-                    response.context,
-                    obj_count,
-                    address,
-                )
-
-    def test_posts_views_profile_paginator(self):
-        """Проверяем паджинатор страницы профайла."""
-        test_address = {
             reverse(
                 'posts:profile',
                 kwargs={

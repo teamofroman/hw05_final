@@ -7,6 +7,8 @@
   <div class="container py-5">
     <h1>Все посты пользователя {{ author|correct_username }}</h1>
     <h3>Всего постов: {{ author.posts.count }} </h3>
+    <h3>Подписок: {{ author.follower.count }} авторов</h3>
+    <h3>Подписано: {{ author.following.count }} авторов</h3>
     {% if user.is_authenticated and user != author %}
       <div class="container py-2">
         {% if is_following %}
@@ -31,7 +33,7 @@
     </div>
 
     {% for post in page_obj %}
-      {% include 'includes/posts/post_v2.html' %}
+      {% include 'includes/posts/post_v2.html' with show_page='profile' %}
       {% if not forloop.last %}
         <hr>
       {% endif %}

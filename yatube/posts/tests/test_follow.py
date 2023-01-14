@@ -13,20 +13,6 @@ class TestFollow(YatubeTestBase):
         cls.test_user = User.objects.create(username='test_user')
         cls.test_author = User.objects.create(username='test_author')
 
-        # objs = [Post(
-        #     text=f'Test author post #{i}',
-        #     author=cls.test_author,
-        # ) for i in range(3)]
-        #
-        # cls.test_user_posts = Post.objects.bulk_create(objs)
-        #
-        # objs = [Post(
-        #     text=f'Test user post #{i}',
-        #     author=cls.test_user,
-        # ) for i in range(3)]
-        #
-        # cls.test_author_posts = Post.objects.bulk_create(objs)
-
     def setUp(self):
         self.user_client = Client()
         self.user_client.force_login(TestFollow.test_user)
@@ -73,9 +59,21 @@ class TestFollow(YatubeTestBase):
             'Не удалось подписаться на автора',
         )
 
+        self.assertTrue(
+            Follow.objects.filter(
+                user=TestFollow.test_user,
+                author=TestFollow.test_author,
+            ).exists(),
+            'Подписка на автора отсутствует в базе',
+        )
+
     def test_follow_unfollow_author(self):
         """TestFollow: Не следить за автором."""
-        self.test_follow_follow_to_author()
+        Follow.objects.create(
+            user=TestFollow.test_user,
+            author=TestFollow.test_author,
+        )
+
         follow_count = Follow.objects.filter(user=TestFollow.test_user).count()
         address = reverse(
             'posts:profile_unfollow',
@@ -91,6 +89,14 @@ class TestFollow(YatubeTestBase):
             Follow.objects.filter(user=TestFollow.test_user).count(),
             follow_count - 1,
             'Не удалось отписаться от автора'
+        )
+
+        self.assertTrue(
+            not Follow.objects.filter(
+                user=TestFollow.test_user,
+                author=TestFollow.test_author,
+            ).exists(),
+            'Подписка на автора присутствует в базе',
         )
 
     def test_follow_follow_self(self):
@@ -114,7 +120,11 @@ class TestFollow(YatubeTestBase):
 
     def test_follow_new_post(self):
         """TestFollow: Новая запись появляется в ленте подписантов."""
-        self.test_follow_follow_to_author()
+        Follow.objects.create(
+            user=TestFollow.test_user,
+            author=TestFollow.test_author,
+        )
+
         address = reverse('posts:follow_index')
         new_post = Post.objects.create(
             text='Test post',

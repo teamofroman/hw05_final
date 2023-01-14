@@ -7,7 +7,7 @@
   {% block content %}
     {% load user_filters %}
     <h1 class="py-2" style="text-align: center">Все обновления на сайте</h1>
-    {% include 'includes/posts/switcher.html' %}
+    {% include 'includes/posts/switcher.html' with show_page='index' %}
     <div class="container py-2">
       {% include 'includes/paginator.html' %}
     </div>

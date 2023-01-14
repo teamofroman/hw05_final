@@ -25,5 +25,17 @@ class CommentAdmin(admin.ModelAdmin):
     empty_value_display = '-пусто-'
 
 
-admin.site.register(models.Group)
-admin.site.register(models.Follow)
+@admin.register(models.Follow)
+class FollowAdmin(admin.ModelAdmin):
+    list_display = ('pk', 'user', 'author')
+    search_fields = ('user', 'author',)
+    list_filter = ('user', 'author',)
+    list_editable = ('user', 'author',)
+    empty_value_display = '-пусто-'
+
+
+@admin.register(models.Group)
+class GroupAdmin(admin.ModelAdmin):
+    list_display = ('pk', 'title', 'slug', 'description',)
+    search_fields = ('slug',)
+    empty_value_display = '-пусто-'

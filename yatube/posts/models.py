@@ -1,6 +1,7 @@
 """Описание моделей БД."""
 from django.contrib.auth import get_user_model
 from django.db import models
+
 from posts.constants import MAX_PRESENTATION_LENGTH
 
 User = get_user_model()
@@ -75,7 +76,7 @@ class Post(models.Model):
     class Meta:
         """Класс для дополнительных параметров модели."""
 
-        ordering = ['-pub_date']
+        ordering = ('-pub_date',)
         verbose_name = 'Публикация'
         verbose_name_plural = 'Публикации'
 
@@ -116,7 +117,7 @@ class Comment(models.Model):
     class Meta:
         """Класс для дополнительных параметров модели."""
 
-        ordering = ['-created']
+        ordering = ('-created',)
         verbose_name = 'Комментарий'
         verbose_name_plural = 'Комментарии'
 
