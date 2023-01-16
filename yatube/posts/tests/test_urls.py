@@ -73,7 +73,9 @@ class TestPostsUrls(YatubeTestBase):
         tests_urls = [
             f'/posts/{TestPostsUrls.test_post.id}/edit/',
             '/create/',
-            f'/posts/{TestPostsUrls.test_post.id}/comment/'
+            f'/posts/{TestPostsUrls.test_post.id}/comment/',
+            f'/profile/{TestPostsUrls.test_user}/follow/',
+            f'/profile/{TestPostsUrls.test_user}/unfollow/',
         ]
 
         for address in tests_urls:

@@ -20,26 +20,6 @@ class TestFollow(YatubeTestBase):
         self.author_client = Client()
         self.author_client.force_login(TestFollow.test_author)
 
-    def test_follow_redirect_unauth_user(self):
-        """TestFollow: Перенаправление не авторизированного пользователя."""
-        address = reverse(
-            'posts:profile_follow',
-            kwargs={'username': TestFollow.test_user},
-        )
-
-        response = self.get_response_post(
-            client=self.client,
-            address=address,
-            post_data={'text': 'Test comment'},
-            follow=True,
-        )
-
-        self.assertRedirects(
-            response,
-            reverse(
-                'users:login') + f'?next={address}',
-        )
-
     def test_follow_follow_to_author(self):
         """TestFolow: Следить за автором."""
         follow_count = Follow.objects.filter(user=TestFollow.test_user).count()
@@ -118,7 +98,7 @@ class TestFollow(YatubeTestBase):
             'Подписались на самого себя',
         )
 
-    def test_follow_new_post(self):
+    def test_follow_new_post_on_follow_user(self):
         """TestFollow: Новая запись появляется в ленте подписантов."""
         Follow.objects.create(
             user=TestFollow.test_user,
@@ -155,6 +135,20 @@ class TestFollow(YatubeTestBase):
             new_post,
             f'Пост на странице {address} для {TestFollow.test_user} '
             'не соответствует созданному',
+        )
+
+    def test_follow_new_post_on_unfollow_user(self):
+        """TestFollow: Новой записи нет в ленте неподписанного пользователя."""
+
+        Follow.objects.create(
+            user=TestFollow.test_user,
+            author=TestFollow.test_author,
+        )
+
+        address = reverse('posts:follow_index')
+        Post.objects.create(
+            text='Test post',
+            author=TestFollow.test_author,
         )
 
         response = self.get_response_get(
