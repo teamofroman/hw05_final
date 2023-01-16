@@ -1,11 +1,12 @@
+from django.db.models.query import QuerySet
 from django.test import Client
 from django.urls import reverse
 
-from posts.models import Group, Post, User
+from posts.models import Comment, Group, Post, User
 from posts.tests.utils import YatubeTestBase
 
 
-class TestPostsViews(YatubeTestBase):
+class TestFormsViews(YatubeTestBase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -29,7 +30,7 @@ class TestPostsViews(YatubeTestBase):
     def setUp(self):
         self.__current_posts_id = None
         self.auth_client_author = Client()
-        self.auth_client_author.force_login(TestPostsViews.test_author)
+        self.auth_client_author.force_login(TestFormsViews.test_author)
 
     def __get_current_posts_id(self):
         self.__current_posts_id = set([post.id for post in Post.objects.all()])
@@ -54,7 +55,7 @@ class TestPostsViews(YatubeTestBase):
             address,
             post_data={
                 'text': post_text,
-                'group': TestPostsViews.test_group.id,
+                'group': TestFormsViews.test_group.id,
             },
         )
 
@@ -78,19 +79,19 @@ class TestPostsViews(YatubeTestBase):
 
         self.assertEqual(
             post.group,
-            TestPostsViews.test_group,
+            TestFormsViews.test_group,
             (
                 'Группа поста не соответствует заданной. '
-                f'{TestPostsViews.test_group} != {post.group}'
+                f'{TestFormsViews.test_group} != {post.group}'
             ),
         )
 
         self.assertEqual(
             post.author,
-            TestPostsViews.test_author,
+            TestFormsViews.test_author,
             (
                 'Группа поста не соответствует заданной. '
-                f'{TestPostsViews.test_author} != {post.author}'
+                f'{TestFormsViews.test_author} != {post.author}'
             ),
         )
 
@@ -98,11 +99,11 @@ class TestPostsViews(YatubeTestBase):
         """Редактирование поста. Меняем текст."""
         address = reverse(
             'posts:post_edit',
-            kwargs={'post_id': TestPostsViews.test_post.id},
+            kwargs={'post_id': TestFormsViews.test_post.id},
         )
-        post_text = TestPostsViews.test_post.text + 'Auto created post'
-        post_author = TestPostsViews.test_post.author
-        post_group = TestPostsViews.test_post.group
+        post_text = TestFormsViews.test_post.text + 'Auto created post'
+        post_author = TestFormsViews.test_post.author
+        post_group = TestFormsViews.test_post.group
 
         self.__get_current_posts_id()
         self.get_response_post(
@@ -122,7 +123,7 @@ class TestPostsViews(YatubeTestBase):
             'Вместо редактирования создан пост',
         )
 
-        post = Post.objects.get(id=TestPostsViews.test_post.id)
+        post = Post.objects.get(id=TestFormsViews.test_post.id)
         self.assertEqual(
             post.text,
             post_text,
@@ -143,10 +144,10 @@ class TestPostsViews(YatubeTestBase):
         """Редактирование поста. Меняем группу."""
         address = reverse(
             'posts:post_edit',
-            kwargs={'post_id': TestPostsViews.test_post.id},
+            kwargs={'post_id': TestFormsViews.test_post.id},
         )
-        post_text = TestPostsViews.test_post.text
-        post_author = TestPostsViews.test_post.author
+        post_text = TestFormsViews.test_post.text
+        post_author = TestFormsViews.test_post.author
         post_group = Group.objects.create(
             title='Test group 2',
             slug='test_group_2',
@@ -171,7 +172,7 @@ class TestPostsViews(YatubeTestBase):
             'Вместо редактирования создан пост',
         )
 
-        post = Post.objects.get(id=TestPostsViews.test_post.id)
+        post = Post.objects.get(id=TestFormsViews.test_post.id)
 
         self.assertEqual(
             post.text,
@@ -195,10 +196,10 @@ class TestPostsViews(YatubeTestBase):
         """Редактирование поста. Меняем текст и группу."""
         address = reverse(
             'posts:post_edit',
-            kwargs={'post_id': TestPostsViews.test_post.id},
+            kwargs={'post_id': TestFormsViews.test_post.id},
         )
-        post_text = TestPostsViews.test_post.text + 'Auto create text'
-        post_author = TestPostsViews.test_post.author
+        post_text = TestFormsViews.test_post.text + 'Auto create text'
+        post_author = TestFormsViews.test_post.author
         post_group = Group.objects.create(
             title='Test group 2',
             slug='test_group_2',
@@ -224,7 +225,7 @@ class TestPostsViews(YatubeTestBase):
             'Вместо редактирования создан пост',
         )
 
-        post = Post.objects.get(id=TestPostsViews.test_post.id)
+        post = Post.objects.get(id=TestFormsViews.test_post.id)
         self.assertEqual(
             post.text,
             post_text,
@@ -241,4 +242,56 @@ class TestPostsViews(YatubeTestBase):
             post.author,
             post_author,
             f'Изменился автор поста. {post.author} != {post_author}',
+        )
+
+    def test_posts_views_add_comment(self):
+        """TestComment: Добавление комментария к посту."""
+        address_add_comment = reverse(
+            'posts:add_comment',
+            kwargs={'post_id': TestFormsViews.test_post.id},
+        )
+
+        address_post_detail = reverse(
+            'posts:post_detail',
+            kwargs={'post_id': TestFormsViews.test_post.id},
+        )
+
+        self.get_response_post(
+            client=self.auth_client_author,
+            address=address_add_comment,
+            post_data={'text': 'Test comment'},
+            follow=True,
+        )
+
+        response = self.get_response_get(
+            client=self.auth_client_author,
+            address=address_post_detail,
+        )
+
+        comments = self.get_field_from_context(
+            response.context,
+            QuerySet,
+        )
+
+        self.assertEqual(
+            len(comments),
+            1,
+            f'Количество комментариев на странице '
+            f'{address_post_detail} не соответствует созданным'
+        )
+
+        self.assertIsInstance(
+            comments[0],
+            Comment,
+            f'Комментарии на странице {address_post_detail} '
+            f'имеют тип отличный от Comment'
+        )
+
+        self.assertTrue(
+            Comment.objects.filter(
+                post=TestFormsViews.test_post,
+                author=TestFormsViews.test_author,
+                text='Test comment',
+            ).exists(),
+            'Комментарий не создан'
         )

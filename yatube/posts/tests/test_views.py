@@ -23,10 +23,6 @@ class TestPostsViews(YatubeTestBase):
             description='This is test group',
         )
 
-        # cls.test_user = User.objects.create_user(
-        #     username='testuser',
-        # )
-
         cls.test_author = User.objects.create_user(
             username='testauthor',
         )
@@ -353,55 +349,3 @@ class TestPostsViews(YatubeTestBase):
                         ' не соответствует созданному посту'
                     ),
                 )
-
-    def test_posts_views_add_comment(self):
-        """TestComment: Добавление комментария к посту."""
-        address_add_comment = reverse(
-            'posts:add_comment',
-            kwargs={'post_id': TestPostsViews.test_post.id},
-        )
-
-        address_post_detail = reverse(
-            'posts:post_detail',
-            kwargs={'post_id': TestPostsViews.test_post.id},
-        )
-
-        self.get_response_post(
-            client=self.auth_client_author,
-            address=address_add_comment,
-            post_data={'text': 'Test comment'},
-            follow=True,
-        )
-
-        response = self.get_response_get(
-            client=self.auth_client_author,
-            address=address_post_detail,
-        )
-
-        comments = self.get_field_from_context(
-            response.context,
-            QuerySet,
-        )
-
-        self.assertEqual(
-            len(comments),
-            1,
-            f'Количество комментариев на странице '
-            f'{address_post_detail} не соответствует созданным'
-        )
-
-        self.assertIsInstance(
-            comments[0],
-            Comment,
-            f'Комментарии на странице {address_post_detail} '
-            f'имеют тип отличный от Comment'
-        )
-
-        self.assertTrue(
-            Comment.objects.filter(
-                post=TestPostsViews.test_post,
-                author=TestPostsViews.test_author,
-                text='Test comment',
-            ).exists(),
-            'Комментарий не создан'
-        )
