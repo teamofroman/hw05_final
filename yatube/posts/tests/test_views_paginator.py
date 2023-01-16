@@ -42,7 +42,7 @@ class TestPostsViewsPaginator(YatubeTestBase):
         cache.clear()
 
     def __check_paginator_context(self, context, post_count, address):
-        page_obj = self.get_field_from_context(context, Page)
+        page_obj = self.get_field_from_context_by_type(context, Page)
         self.assertIsNotNone(
             page_obj,
             f'На странице `{address}` не найден объект типа Page',

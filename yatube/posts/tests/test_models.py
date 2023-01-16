@@ -92,26 +92,32 @@ class TestModels(YatubeTestBase):
                     expected_value,
                 )
 
-    def test_models_post_str_long_text(self):
-        """Проверяем метод __str__ для длинного текста для модели Post"""
-        self.assertEqual(
-            str(TestModels.test_post),
-            TestModels.test_post.text[:MAX_PRESENTATION_LENGTH] + '...',
-            'Проверьте работу метода __str__ модели Post.',
-        )
+    def test_models_str(self):
+        test_data = {
+            'post_long_text': {
+                'model': TestModels.test_post,
+                'result': TestModels.test_post.text[
+                          :MAX_PRESENTATION_LENGTH] + '...',
+                'message': ('Проверьте метод __str__ модели Post для '
+                            'длинного текста.')
+            },
+            'post_short_text': {
+                'model': TestModels.test_post_short_text,
+                'result': 'Test post',
+                'message': ('Проверьте метод __str__ модели Post для '
+                            'короткого текста.')
+            },
+            'group_title': {
+                'model': TestModels.test_group,
+                'result': 'Test group',
+                'message': 'Проверьте метод __str__ модели Group'
+            }
+        }
 
-    def test_models_post_str_short_text(self):
-        """Проверяем метод __str__ для короткого текста для модели Post"""
-        self.assertEqual(
-            str(TestModels.test_post_short_text),
-            'Test post',
-            'Проверьте работу метода __str__ модели Post.',
-        )
-
-    def test_models_group_str(self):
-        """Проверяем метод __str__ для модели Group"""
-        self.assertEqual(
-            str(TestModels.test_group),
-            TestModels.test_group.title,
-            'Проверьте работу метода __str__ модели Group.',
-        )
+        for test, data in test_data.items():
+            with self.subTest(test=test):
+                self.assertEqual(
+                    str(data['model']),
+                    data['result'],
+                    data['message'],
+                )

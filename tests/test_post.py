@@ -14,7 +14,6 @@ from django.core.paginator import Page
 
 from tests.utils import get_field_from_context
 
-
 class TestPostView:
 
     @pytest.mark.django_db(transaction=True)

@@ -31,10 +31,11 @@ def group_list(request: WSGIRequest, slug: str) -> HttpResponse:
     """Выводим посты группы с адресом slug."""
     group = get_object_or_404(Group, slug=slug)
 
-    posts = Post.objects.filter(group=group).select_related(
-        'author',
-    )
+    # posts = Post.objects.filter(group=group).select_related(
+    #     'author',
+    # )
 
+    posts = group.posts.all()
     context = {
         'group': group,
         'page_obj': build_page_from_posts(request, posts),
@@ -48,7 +49,7 @@ def profile(request: WSGIRequest, username: str):
     user = get_object_or_404(User, username=username)
     is_follow = request.user.is_authenticated and request.user.follower.filter(
         author=user
-    ).count() > 0
+    ).exists()
 
     context = {
         'author': user,
@@ -147,8 +148,9 @@ def follow_index(request):
 @login_required
 def profile_follow(request, username):
     author = get_object_or_404(User, username=username)
-    if request.user != author and \
-            request.user.follower.filter(author=author).count() == 0:
+    if request.user != author and not request.user.follower.filter(
+            author=author
+    ).exists():
         Follow.objects.create(
             user=request.user,
             author=author,
@@ -159,6 +161,5 @@ def profile_follow(request, username):
 @login_required
 def profile_unfollow(request, username):
     author = get_object_or_404(User, username=username)
-    if request.user != author:
-        request.user.follower.filter(author=author).delete()
+    request.user.follower.filter(author=author).delete()
     return redirect('posts:profile', username=username)

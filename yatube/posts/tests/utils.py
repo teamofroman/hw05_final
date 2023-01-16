@@ -3,13 +3,21 @@ from django.template.context import RequestContext
 
 
 class YatubeTestBase(TestCase):
-    def get_field_from_context(self, context, field_type):
+    def get_field_from_context_by_type(self, context, field_type):
         if isinstance(context, RequestContext):
             context = context.flatten()
         for field in context.keys():
             if field not in ('user', 'request') and isinstance(
                     context[field], field_type
             ):
+                return context[field]
+        return None
+
+    def get_field_from_context_by_name(self, context, field_name):
+        if isinstance(context, RequestContext):
+            context = context.flatten()
+        for field in context.keys():
+            if field == field_name:
                 return context[field]
         return None
 

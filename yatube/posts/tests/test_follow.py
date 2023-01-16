@@ -116,7 +116,7 @@ class TestFollow(YatubeTestBase):
             address,
         )
 
-        page_obj = self.get_field_from_context(response.context, Page)
+        page_obj = self.get_field_from_context_by_type(response.context, Page)
         self.assertIsNotNone(
             page_obj,
             f'На странице {address} для {TestFollow.test_user} '
@@ -156,7 +156,7 @@ class TestFollow(YatubeTestBase):
             address,
         )
 
-        page_obj = self.get_field_from_context(response.context, Page)
+        page_obj = self.get_field_from_context_by_type(response.context, Page)
         self.assertIsNotNone(
             page_obj,
             f'На странице {address} для {TestFollow.test_author} '

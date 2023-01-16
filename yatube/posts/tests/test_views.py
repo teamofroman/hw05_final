@@ -1,17 +1,24 @@
 """Тесты для проверки тестирования процедур формирования
 и отображения данных."""
+import shutil
+import tempfile
+
+from django.conf import settings
 from django.core.cache import cache
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.paginator import Page
-from django.db.models import Count
 from django.db.models.query import QuerySet
-from django.test import Client
+from django.test import Client, override_settings
 from django.urls import reverse
 
 from posts.forms import CommentForm, PostForm
 from posts.models import Comment, Group, Post, User
 from posts.tests.utils import YatubeTestBase
 
+TMP_MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
 
+
+@override_settings(MEDIA_ROOT=TMP_MEDIA_ROOT)
 class TestPostsViews(YatubeTestBase):
     @classmethod
     def setUpClass(cls):
@@ -27,11 +34,32 @@ class TestPostsViews(YatubeTestBase):
             username='testauthor',
         )
 
+        cls.small_gif = (
+            b'\x47\x49\x46\x38\x39\x61\x02\x00'
+            b'\x01\x00\x80\x00\x00\x00\x00\x00'
+            b'\xFF\xFF\xFF\x21\xF9\x04\x00\x00'
+            b'\x00\x00\x00\x2C\x00\x00\x00\x00'
+            b'\x02\x00\x01\x00\x00\x02\x02\x0C'
+            b'\x0A\x00\x3B'
+        )
+
+        cls.test_image = SimpleUploadedFile(
+            name='small.gif',
+            content=cls.small_gif,
+            content_type='image/gif'
+        )
+
         cls.test_post = Post.objects.create(
             text='Test post',
             author=cls.test_author,
             group=cls.test_group,
+            image=cls.test_image,
         )
+
+    @classmethod
+    def tearDownClass(cls):
+        super().tearDownClass()
+        shutil.rmtree(TMP_MEDIA_ROOT, ignore_errors=True)
 
     def setUp(self):
         self.auth_client_author = Client()
@@ -39,7 +67,7 @@ class TestPostsViews(YatubeTestBase):
         cache.clear()
 
     def __check_post_content(self, context, valid_post, page_address):
-        page_obj = self.get_field_from_context(context, Page)
+        page_obj = self.get_field_from_context_by_type(context, Page)
         self.assertIsNotNone(
             page_obj,
             f'На странице `{page_address}` не найден объект типа Page'
@@ -76,6 +104,14 @@ class TestPostsViews(YatubeTestBase):
             valid_post.group,
             (
                 f'Группа первого поста на странице `{page_address}` не '
+                'соответствует значению в БД'
+            ),
+        )
+        self.assertEqual(
+            page_obj[0].image,
+            valid_post.image,
+            (
+                f'Картинка первого поста на странице `{page_address}` не '
                 'соответствует значению в БД'
             ),
         )
@@ -144,7 +180,7 @@ class TestPostsViews(YatubeTestBase):
             address,
         )
 
-        group = self.get_field_from_context(response.context, Group)
+        group = self.get_field_from_context_by_type(response.context, Group)
         self.assertIsNotNone(
             group,
             f'На странице `{address}` не найден объект типа Group'
@@ -161,6 +197,15 @@ class TestPostsViews(YatubeTestBase):
             address,
         )
 
+        group_var = self.get_field_from_context_by_name(
+            response.context,
+            'group',
+        )
+        self.assertIsNotNone(
+            group_var,
+            f'На странице `{address}` не найден объект group'
+        )
+
     def test_posts_views_profile_context(self):
         """Проверяем контекст страницы профайла."""
         address = reverse(
@@ -172,7 +217,7 @@ class TestPostsViews(YatubeTestBase):
             address,
         )
 
-        author = self.get_field_from_context(response.context, User)
+        author = self.get_field_from_context_by_type(response.context, User)
         self.assertIsNotNone(
             author,
             f'На странице `{address}` не найден объект типа User'
@@ -187,6 +232,21 @@ class TestPostsViews(YatubeTestBase):
             response.context,
             TestPostsViews.test_post,
             address,
+        )
+
+        user = self.get_field_from_context_by_type(response.context, User)
+        self.assertIsNotNone(
+            user,
+            f'На странице `{address}` не найден объект типа User'
+        )
+
+        is_following = self.get_field_from_context_by_name(
+            response.context,
+            'is_following',
+        )
+        self.assertIsNotNone(
+            is_following,
+            f'На странице `{address}` не найден объект is_following'
         )
 
     def test_posts_views_post_detail_context(self):
@@ -207,7 +267,7 @@ class TestPostsViews(YatubeTestBase):
             address,
         )
 
-        post = self.get_field_from_context(response.context, Post)
+        post = self.get_field_from_context_by_type(response.context, Post)
         self.assertIsNotNone(
             post,
             f'На странице `{address}` не найден объект типа Post',
@@ -222,7 +282,7 @@ class TestPostsViews(YatubeTestBase):
             ),
         )
 
-        comment_form = self.get_field_from_context(
+        comment_form = self.get_field_from_context_by_type(
             response.context,
             CommentForm
         )
@@ -232,7 +292,7 @@ class TestPostsViews(YatubeTestBase):
             f'На странице {address} не найдена форма комментария'
         )
 
-        comments = self.get_field_from_context(
+        comments = self.get_field_from_context_by_type(
             response.context,
             QuerySet,
         )
@@ -267,7 +327,7 @@ class TestPostsViews(YatubeTestBase):
             address,
         )
 
-        form = self.get_field_from_context(response.context, PostForm)
+        form = self.get_field_from_context_by_type(response.context, PostForm)
         self.assertIsNotNone(
             form,
             f'На странице `{address}` не найден объект типа PostForm',
@@ -285,10 +345,18 @@ class TestPostsViews(YatubeTestBase):
             address,
         )
 
-        form = self.get_field_from_context(response.context, PostForm)
+        form = self.get_field_from_context_by_type(response.context, PostForm)
         self.assertIsNotNone(
             form,
             f'На странице `{address}` не найден объект типа PostForm',
+        )
+        is_edit_var = self.get_field_from_context_by_name(
+            response.context,
+            'is_edit',
+        )
+        self.assertIsNotNone(
+            is_edit_var,
+            f'На странице `{address}` не найден объект is_edit'
         )
 
     def tests_posts_views_new_post_create(self):
@@ -308,7 +376,7 @@ class TestPostsViews(YatubeTestBase):
 
         old_posts_count = Post.objects.filter(
             group=TestPostsViews.test_group
-        ).aggregate(Count('id'))['id__count']
+        ).count()
 
         self.assertEqual(
             old_posts_count,
@@ -335,7 +403,10 @@ class TestPostsViews(YatubeTestBase):
                     address,
                 )
 
-                page_obj = self.get_field_from_context(response.context, Page)
+                page_obj = self.get_field_from_context_by_type(
+                    response.context,
+                    Page,
+                )
                 self.assertIsNotNone(
                     page_obj,
                     f'На странице `{address}` не найден объект типа Page',
@@ -346,6 +417,25 @@ class TestPostsViews(YatubeTestBase):
                     new_post,
                     (
                         f'Содержание первого поста на странице `{address}`'
-                        ' не соответствует созданному посту'
+                        ' не соответствует созданному посту',
                     ),
                 )
+
+        address = reverse(
+            'posts:group_list',
+            kwargs={'slug': TestPostsViews.test_group.slug},
+        )
+        response = self.get_response_get(
+            self.auth_client_author,
+            address,
+        )
+
+        page_obj = self.get_field_from_context_by_type(
+            response.context,
+            Page,
+        )
+        self.assertEqual(
+            len(page_obj),
+            1,
+            f'На странице `{address}` найден новый пост',
+        )

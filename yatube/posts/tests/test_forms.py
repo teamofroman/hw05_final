@@ -403,7 +403,7 @@ class TestFormsViews(YatubeTestBase):
             address=address_post_detail,
         )
 
-        comments = self.get_field_from_context(
+        comments = self.get_field_from_context_by_type(
             response.context,
             QuerySet,
         )
