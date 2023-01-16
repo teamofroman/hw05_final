@@ -3,11 +3,12 @@
 from django.core.cache import cache
 from django.core.paginator import Page
 from django.db.models import Count
+from django.db.models.query import QuerySet
 from django.test import Client
 from django.urls import reverse
 
-from posts.forms import PostForm
-from posts.models import Group, Post, User
+from posts.forms import CommentForm, PostForm
+from posts.models import Comment, Group, Post, User
 from posts.tests.utils import YatubeTestBase
 
 
@@ -21,6 +22,10 @@ class TestPostsViews(YatubeTestBase):
             slug='test_group',
             description='This is test group',
         )
+
+        # cls.test_user = User.objects.create_user(
+        #     username='testuser',
+        # )
 
         cls.test_author = User.objects.create_user(
             username='testauthor',
@@ -195,6 +200,12 @@ class TestPostsViews(YatubeTestBase):
             kwargs={'post_id': TestPostsViews.test_post.id},
         )
 
+        test_comment = Comment.objects.create(
+            text='Test comment',
+            author=TestPostsViews.test_author,
+            post=TestPostsViews.test_post,
+        )
+
         response = self.get_response_get(
             self.auth_client_author,
             address,
@@ -213,6 +224,42 @@ class TestPostsViews(YatubeTestBase):
                 f'Данные поста на странице `{address}` не соответствуют '
                 'данным поста в БД'
             ),
+        )
+
+        comment_form = self.get_field_from_context(
+            response.context,
+            CommentForm
+        )
+
+        self.assertIsNotNone(
+            comment_form,
+            f'На странице {address} не найдена форма комментария'
+        )
+
+        comments = self.get_field_from_context(
+            response.context,
+            QuerySet,
+        )
+
+        self.assertEqual(
+            len(comments),
+            1,
+            f'Количество комментариев на странице '
+            f'{address} не соответствует созданным'
+        )
+
+        self.assertIsInstance(
+            comments[0],
+            Comment,
+            f'Комментарии на странице {address} '
+            f'имеют тип отличный от Comment'
+        )
+
+        self.assertEqual(
+            comments[0],
+            test_comment,
+            f'Содержимое комментария на странице '
+            f'{address} не соответствует созданному'
         )
 
     def test_posts_views_post_create_context(self):
@@ -306,3 +353,55 @@ class TestPostsViews(YatubeTestBase):
                         ' не соответствует созданному посту'
                     ),
                 )
+
+    def test_posts_views_add_comment(self):
+        """TestComment: Добавление комментария к посту."""
+        address_add_comment = reverse(
+            'posts:add_comment',
+            kwargs={'post_id': TestPostsViews.test_post.id},
+        )
+
+        address_post_detail = reverse(
+            'posts:post_detail',
+            kwargs={'post_id': TestPostsViews.test_post.id},
+        )
+
+        self.get_response_post(
+            client=self.auth_client_author,
+            address=address_add_comment,
+            post_data={'text': 'Test comment'},
+            follow=True,
+        )
+
+        response = self.get_response_get(
+            client=self.auth_client_author,
+            address=address_post_detail,
+        )
+
+        comments = self.get_field_from_context(
+            response.context,
+            QuerySet,
+        )
+
+        self.assertEqual(
+            len(comments),
+            1,
+            f'Количество комментариев на странице '
+            f'{address_post_detail} не соответствует созданным'
+        )
+
+        self.assertIsInstance(
+            comments[0],
+            Comment,
+            f'Комментарии на странице {address_post_detail} '
+            f'имеют тип отличный от Comment'
+        )
+
+        self.assertTrue(
+            Comment.objects.filter(
+                post=TestPostsViews.test_post,
+                author=TestPostsViews.test_author,
+                text='Test comment',
+            ).exists(),
+            'Комментарий не создан'
+        )

@@ -73,6 +73,7 @@ class TestPostsUrls(YatubeTestBase):
         tests_urls = [
             f'/posts/{TestPostsUrls.test_post.id}/edit/',
             '/create/',
+            f'/posts/{TestPostsUrls.test_post.id}/comment/'
         ]
 
         for address in tests_urls:
@@ -139,6 +140,21 @@ class TestPostsUrls(YatubeTestBase):
                 'posts:post_detail',
                 kwargs={'post_id': TestPostsUrls.test_post.id},
             )
+        )
+
+    def test_posts_redirect_add_comment_auth_user(self):
+        """TestComment: Переадресация авторизированного пользователя."""
+
+        response = self.get_response_post(
+            client=self.auth_client_user,
+            address=f'/posts/{TestPostsUrls.test_post.id}/comment/',
+            post_data={'text': 'Test comment'},
+            follow=True,
+        )
+
+        self.assertRedirects(
+            response,
+            f'/posts/{TestPostsUrls.test_post.id}/',
         )
 
     def test_posts_urls_auth_user_author(self):
