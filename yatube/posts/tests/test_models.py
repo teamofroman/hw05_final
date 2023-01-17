@@ -96,8 +96,9 @@ class TestModels(YatubeTestBase):
         test_data = {
             'post_long_text': {
                 'model': TestModels.test_post,
-                'result': TestModels.test_post.text[
-                          :MAX_PRESENTATION_LENGTH] + '...',
+                'result':
+                    f'{TestModels.test_post.text[:MAX_PRESENTATION_LENGTH]}'
+                    '...',
                 'message': ('Проверьте метод __str__ модели Post для '
                             'длинного текста.')
             },
