@@ -28,6 +28,14 @@ class TestFollow(YatubeTestBase):
             kwargs={'username': TestFollow.test_author},
         )
 
+        self.assertFalse(
+            Follow.objects.filter(
+                user=TestFollow.test_user,
+                author=TestFollow.test_author,
+            ).exists(),
+            'Подписка на автора уже есть в базе',
+        )
+
         self.get_response_get(
             self.user_client,
             address
@@ -71,8 +79,8 @@ class TestFollow(YatubeTestBase):
             'Не удалось отписаться от автора'
         )
 
-        self.assertTrue(
-            not Follow.objects.filter(
+        self.assertFalse(
+            Follow.objects.filter(
                 user=TestFollow.test_user,
                 author=TestFollow.test_author,
             ).exists(),

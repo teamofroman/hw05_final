@@ -18,10 +18,11 @@ from posts.utils import build_page_from_posts
 @cache_page(20)
 def index(request: WSGIRequest) -> HttpResponse:
     """Обрабатываем обращения к главной странице сайта."""
-    posts = Post.objects.select_related('author')
-
     context = {
-        'page_obj': build_page_from_posts(request, posts),
+        'page_obj': build_page_from_posts(
+            request,
+            Post.objects.select_related('author'),
+        ),
     }
 
     return render(request, 'posts/index.html', context)
@@ -30,15 +31,12 @@ def index(request: WSGIRequest) -> HttpResponse:
 def group_list(request: WSGIRequest, slug: str) -> HttpResponse:
     """Выводим посты группы с адресом slug."""
     group = get_object_or_404(Group, slug=slug)
-
-    # posts = Post.objects.filter(group=group).select_related(
-    #     'author',
-    # )
-
-    posts = group.posts.all()
     context = {
         'group': group,
-        'page_obj': build_page_from_posts(request, posts),
+        'page_obj': build_page_from_posts(
+            request,
+            group.posts.all(),
+        ),
     }
 
     return render(request, 'posts/group_list.html', context)
@@ -134,10 +132,11 @@ def add_comment(request, post_id):
 
 @login_required
 def follow_index(request):
-    posts = Post.objects.filter(author__following__user=request.user)
-
     context = {
-        'page_obj': build_page_from_posts(request, posts),
+        'page_obj': build_page_from_posts(
+            request,
+            Post.objects.filter(author__following__user=request.user),
+        ),
     }
 
     return render(request, 'posts/follow.html', context)

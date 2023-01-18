@@ -87,7 +87,7 @@ class TestPostsViews(YatubeTestBase):
             valid_post.text,
             (
                 f'Содержание первого поста на странице `{page_address}` не '
-                f'соответствует значению в БД'
+                'соответствует значению в БД'
             ),
         )
 
@@ -374,19 +374,6 @@ class TestPostsViews(YatubeTestBase):
             group=group,
         )
 
-        old_posts_count = Post.objects.filter(
-            group=TestPostsViews.test_group
-        ).count()
-
-        self.assertEqual(
-            old_posts_count,
-            1,
-            (
-                f'Пост создан не в той группе.'
-                f' {group.slug}!={TestPostsViews.test_group.slug}'
-            ),
-        )
-
         test_pages = [
             reverse('posts:index'),
             reverse('posts:group_list', kwargs={'slug': group.slug}),
@@ -421,6 +408,19 @@ class TestPostsViews(YatubeTestBase):
                     ),
                 )
 
+    def tests_posts_views_new_post_create_other_group(self):
+        group = Group.objects.create(
+            title='Test group 2',
+            slug='test_group_2',
+            description='This is test group 2',
+        )
+
+        new_post = Post.objects.create(
+            text='Auto created post',
+            author=TestPostsViews.test_author,
+            group=group,
+        )
+
         address = reverse(
             'posts:group_list',
             kwargs={'slug': TestPostsViews.test_group.slug},
@@ -434,8 +434,9 @@ class TestPostsViews(YatubeTestBase):
             response.context,
             Page,
         )
-        self.assertEqual(
-            len(page_obj),
-            1,
-            f'На странице `{address}` найден новый пост',
-        )
+        for page_post in page_obj:
+            self.assertNotEqual(
+                page_post,
+                new_post,
+                f'На странице `{address}` найден новый пост из другой группы',
+            )
