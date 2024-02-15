@@ -1,3 +1,18 @@
-# hw05_final
+# Социальная сеть
+Реализовано создание учетной записи, публикация записей, подписка на авторов, система оценки записей, написаны тесты (PyTest)
 
-[![CI](https://github.com/yandex-praktikum/hw05_final/actions/workflows/python-app.yml/badge.svg?branch=master)](https://github.com/yandex-praktikum/hw05_final/actions/workflows/python-app.yml)
+# Стек технологий: 
+- Python 3
+- Django 2
+- PyTest
+- SQLite
+
+# Запуск
+1. Создаем суперпользователя
+   ```shell
+   python manage.py createsuperuser
+   ```
+2. Запускаем сервер
+   ```shell
+   python manage.py runserver
+   ```
